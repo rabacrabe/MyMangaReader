@@ -208,7 +208,7 @@ public class MangaReaderProxy {
                 Element parent = chapitre_content.parent();
                 Element chapite_node = parent.select("a").first();
                 //Log.e("CHAPITRE", chapite_node.text());
-                Chapitre newChapitre = new Chapitre(chapite_node.text(), "https:"+chapite_node.attr("href").toString());
+                Chapitre newChapitre = new Chapitre(chapite_node.text(), this.urlRoot+chapite_node.attr("href").toString());
                 newTome.addChapitre(newChapitre);
 
                 serie.addChapitre(newChapitre);
@@ -308,28 +308,34 @@ public class MangaReaderProxy {
             String userAgent = "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.87 Safari/537.36";
 
 
-            Log.e("URL", url);
+            Log.i("URL", url);
             Document doc = Jsoup.connect(url).userAgent(userAgent).get();
-            Log.e("GET", "JSOUP \n"+ doc.text());
+            Log.i("GET", "JSOUP \n"+ doc.text());
 
-            Element img_node = doc.select("img#image").first();
+            Element img_node = doc.select("img#img").first();
 
-            Element prec_chapter_node = doc.select("a#back_chapter").first();
+            Elements nav_chapters = doc.select("table.c5 td a");
+
+
+            Element prec_chapter_node = nav_chapters.get(1);
             Chapitre precChapitre = null;
             if (prec_chapter_node != null) {
                 precChapitre = new Chapitre(prec_chapter_node.text(), this.urlRoot + prec_chapter_node.attr("href"));
             }
 
-            Element next_chapter_node = doc.select("a#next_chapter").first();
+            Element next_chapter_node = nav_chapters.get(0);
             Chapitre nextChapitre = null;
             if (next_chapter_node != null) {
                 nextChapitre = new Chapitre(next_chapter_node.text(), this.urlRoot + next_chapter_node.attr("href"));
             }
 
-            Element pages_node = doc.select("select#pages").first();
+            Element TestChapterMenu = doc.select("#chapterMenu").first();
+            Log.i("CHAPTER MENU", TestChapterMenu.text());
+
+            Element pages_node = doc.select("div#selectpage select#pageMenu").first();
 
             for (Element pageItem : pages_node.children()) {
-                Log.e("PAGE", pageItem.text() + " -> " + this.urlRoot + pageItem.attr("value"));
+                Log.i("PAGE", pageItem.text() + " -> " + this.urlRoot + pageItem.attr("value"));
                 Page newPage = new Page(pageItem.text(), this.urlRoot + pageItem.attr("value"));
 
 
@@ -364,7 +370,7 @@ public class MangaReaderProxy {
 
             */
             serie = new Serie("TEST", "");
-            Element serie_name_node = doc.select("tbody > tr > td > a").first();
+            Element serie_name_node = doc.select("h2.c2 > a").first();
             if (serie_name_node != null) {
                 serie.setTitle(serie_name_node.text());
                 serie.setUrl(this.urlRoot + serie_name_node.attr("href") );
