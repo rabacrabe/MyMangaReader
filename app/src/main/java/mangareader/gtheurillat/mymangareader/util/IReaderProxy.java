@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import mangareader.gtheurillat.mymangareader.model.Nouveaute;
 import mangareader.gtheurillat.mymangareader.model.Serie;
 
-public interface ReaderProxy {
+public interface IReaderProxy {
     public ArrayList<Nouveaute> getNouveautes();
     public ArrayList<Serie> getTops();
     public Serie getSerieDetails(String serieTitle, String serieUrl);

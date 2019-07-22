@@ -20,7 +20,7 @@ import mangareader.gtheurillat.mymangareader.model.Tome;
  * Created by gtheurillat on 10/07/2018.
  */
 
-public class MangaReaderProxy implements ReaderProxy{
+public class MangaReaderProxy implements IReaderProxy{
 
     private String urlRoot = "https://www.mangareader.net";
     private String urlCatalogue = "https://www.mangareader.net/alphabetical";
