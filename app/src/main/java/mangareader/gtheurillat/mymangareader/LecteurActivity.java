@@ -543,7 +543,7 @@ public class LecteurActivity extends AppCompatActivity
                 currentChapitre = serie.getLstChapitres().get(1);
                 */
 
-                //Log.e("AFFICHAGE", "nb chapitre -> " + serie.getLstChapitres().size() + " ; current=" + serie.getIdxCurrentChapitre());
+                Log.e("AFFICHAGE", "nb chapitre -> " + serie.getLstChapitres().size() + " ; current=" + serie.getIdxCurrentChapitre());
 
                 currentChapitre = serie.getLstChapitres().get(serie.getIdxCurrentChapitre());
 

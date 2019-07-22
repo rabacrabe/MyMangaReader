@@ -20,11 +20,10 @@ import mangareader.gtheurillat.mymangareader.model.Tome;
  * Created by gtheurillat on 10/07/2018.
  */
 
-public class MangaReaderProxy {
+public class MangaReaderProxy implements ReaderProxy{
 
     private String urlRoot = "https://www.mangareader.net";
     private String urlCatalogue = "https://www.mangareader.net/alphabetical";
-
 
     public MangaReaderProxy() {
 
@@ -46,9 +45,44 @@ public class MangaReaderProxy {
 
             Log.i("NOUVEAUTES", "JSOUP \n"+ nouveautes_node.text());
 
-            Nouveaute new_nouveaute = null;
+            Nouveaute new_nouveaute = new Nouveaute("Nouveautes");
             Serie newSerie = null;
 
+
+
+            Elements lst_lignes_tableaux = nouveautes_node.select("td");
+            for (Element ligne_tableau :  lst_lignes_tableaux) {
+                String ligne_tableau_className = ligne_tableau.attr("class");
+                //Log.i("CLASS td", ligne_tableau_className);
+
+                if (ligne_tableau_className.equals("manga_open") || ligne_tableau_className.equals("manga_close")) {
+                    if (new_nouveaute.getLstSeries().size() > 0) {
+                        lstNouveautes.add(new_nouveaute);
+                    }
+                    new_nouveaute = new Nouveaute("Nouveautes");
+                }
+                else {
+                    for (Element link : ligne_tableau.select("a")) {
+                        String link_className = link.attr("class");
+                        Log.i("CLASS a", link_className);
+
+                        if (link_className.equals("chapter")) {
+                            newSerie = new Serie(link.text(), this.urlRoot + link.attr("href").toString());
+                            new_nouveaute.addSerie(newSerie);
+                            Log.i("SERIE", link.text());
+                        }
+                        else if (link_className.equals("chaptersrec")) {
+                            Chapitre newChapitre = new Chapitre(link.text(), this.urlRoot + link.attr("href"));
+                            newSerie.addChapitre(newChapitre);
+                            Log.i("CHAPITRE", link.text());
+                        }
+                    }
+                }
+
+
+            }
+
+/*
             Elements lst_nouveautes = nouveautes_node.select("td.manga_open");
 
             new_nouveaute = new Nouveaute("Nouveautes");
@@ -58,8 +92,6 @@ public class MangaReaderProxy {
                 Element blocNode = elementNode.parent();
 
                 Log.i("INFO SERIE", "JSOUP : " + blocNode.text());
-
-
 
                 for (Element blocContentNode : blocNode.children()) {
                     //Log.i("TAG1", blocContentNode.tag().toString());
@@ -100,10 +132,11 @@ public class MangaReaderProxy {
 
                 }
             }
-
+*/
         }  catch (IOException e) {
             e.printStackTrace();
         }
+        Log.i("LIST NOUVEAUTES", String.valueOf(lstNouveautes.size()));
 
         return lstNouveautes;
     }
@@ -314,7 +347,7 @@ public class MangaReaderProxy {
 
             Element img_node = doc.select("img#img").first();
 
-            Elements nav_chapters = doc.select("table.c5 td a");
+            Elements nav_chapters = doc.select("div#mangainfo_bas a");
 
 
             Element prec_chapter_node = nav_chapters.get(1);
@@ -328,6 +361,9 @@ public class MangaReaderProxy {
             if (next_chapter_node != null) {
                 nextChapitre = new Chapitre(next_chapter_node.text(), this.urlRoot + next_chapter_node.attr("href"));
             }
+
+            Log.i("PREVIOUS CHAPTER", precChapitre.getTitle());
+            Log.i("NEXT CHAPTER", nextChapitre.getTitle());
 
             Element TestChapterMenu = doc.select("#chapterMenu").first();
             Log.i("CHAPTER MENU", TestChapterMenu.text());
@@ -353,22 +389,7 @@ public class MangaReaderProxy {
             }
 
 
-             /*
 
-            Elements details_serie_node = doc.select("tbody > tr");
-
-
-            Element manga_detail_manga = details_serie_node.get(0).select("td").last();
-            Element manga_detail_chapitre = details_serie_node.get(1).select("td").last();
-            Element manga_detail_titre = details_serie_node.get(2).select("td").last();
-            Element manga_detail_team = details_serie_node.get(3).select("td").last();
-            Element manga_detail_date = details_serie_node.get(4).select("td").last();
-
-            serie = new Serie(manga_detail_titre.text(), this.urlRoot + manga_detail_manga.child(0).attr("href"));
-            serie.setFansub(manga_detail_team.text());
-            serie.setDate_sortie(manga_detail_date.text());
-
-            */
             serie = new Serie("TEST", "");
             Element serie_name_node = doc.select("h2.c2 > a").first();
             if (serie_name_node != null) {
