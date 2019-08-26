@@ -391,7 +391,7 @@ public class MangaReaderProxy implements IReaderProxy{
 
 
             serie = new Serie("TEST", "");
-            Element serie_name_node = doc.select("h2.c2 > a").first();
+            Element serie_name_node = doc.select("div#mangainfo  h2 a").first();
             if (serie_name_node != null) {
                 serie.setTitle(serie_name_node.text());
                 serie.setUrl(this.urlRoot + serie_name_node.attr("href") );

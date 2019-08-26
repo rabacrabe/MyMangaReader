@@ -29,13 +29,18 @@ import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
+import java.net.HttpCookie;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import mangareader.gtheurillat.mymangareader.db.dao.BookmarkDAO;
 import mangareader.gtheurillat.mymangareader.db.model.Bookmark;
 import mangareader.gtheurillat.mymangareader.model.Chapitre;
 import mangareader.gtheurillat.mymangareader.model.Page;
 import mangareader.gtheurillat.mymangareader.model.Serie;
+import mangareader.gtheurillat.mymangareader.util.CloudFlareProxy;
+import mangareader.gtheurillat.mymangareader.util.JapScanProxy;
 import mangareader.gtheurillat.mymangareader.util.MangaReaderProxy;
 import mangareader.gtheurillat.mymangareader.util.picasso.ResizeTransformation;
 
@@ -71,6 +76,8 @@ public class LecteurActivity extends AppCompatActivity
     boolean isDroiteAGauche = false;
     int onDoublesPageNb = 0;
     Boolean loadInBackground= false;
+    String website_title;
+    Map<String, String> cookies;
 
 
     @Override
@@ -79,6 +86,8 @@ public class LecteurActivity extends AppCompatActivity
 
         mainContext = this;
 
+        website_title = getIntent().getStringExtra("WEBSITE_TITLE");
+        setTitle(website_title);
 
         setContentView(R.layout.activity_lecteur);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -93,12 +102,14 @@ public class LecteurActivity extends AppCompatActivity
         lecteurTitreChapitre = (TextView) headerView.findViewById(R.id.lecteur_menu_titre_chapitre);
         lecteurTitreSerie = (TextView) headerView.findViewById(R.id.lecteur_menu_titre_serie);
 
+
         lecteurTitreSerie.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {
                 Intent intent_seriedetail = new Intent(LecteurActivity.this, SerieDetailsActivity.class);
                 intent_seriedetail.putExtra("SERIE_TITLE", serie.getTitle());
                 intent_seriedetail.putExtra("SERIE_URL", serie.getUrl());
+                intent_seriedetail.putExtra("WEBSITE_TITLE", website_title);
                 startActivity(intent_seriedetail);
             }
         });
@@ -171,6 +182,7 @@ public class LecteurActivity extends AppCompatActivity
         //serieUrl = getIntent().getStringExtra("SERIE_URL");
         chapitreTitle = (String)getIntent().getSerializableExtra("CHAPITRE_TITLE");
         chapitreUrl = (String)getIntent().getSerializableExtra("CHAPITRE_URL");
+        website_title = (String)getIntent().getSerializableExtra("WEBSITE_TITLE");
 
 
         titrePage.setText(chapitreTitle);
@@ -183,7 +195,38 @@ public class LecteurActivity extends AppCompatActivity
         display.getSize(size);
         disply_width = size.x;
 
-        new Lecteur().execute();
+
+        if (website_title.equals("JAPSCAN")) {
+
+            mProgressDialog = new ProgressDialog(this.mainContext);
+            mProgressDialog.setTitle(chapitreTitle);
+            mProgressDialog.setMessage("Loading...");
+            mProgressDialog.setIndeterminate(false);
+            mProgressDialog.show();
+
+            CloudFlareProxy cf = new CloudFlareProxy(JapScanProxy.urlRoot);
+
+            cf.setUser_agent(JapScanProxy.UA);
+            cf.getCookies(new CloudFlareProxy.cfCallback() {
+                @Override
+                public void onSuccess(List<HttpCookie> cookieList) {
+                    Log.i("CLOUDFLAREPROXY", "SUCCESS");
+                    cookies = CloudFlareProxy.List2Map(cookieList);
+
+                    mProgressDialog.dismiss();
+
+                    new Lecteur().execute();
+                }
+
+                @Override
+                public void onFail() {
+                    Log.i("CLOUDFLAREPROXY", "ECHEC");
+                }
+            });
+        } else {
+            new Lecteur().execute();
+        }
+
 
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -221,6 +264,26 @@ public class LecteurActivity extends AppCompatActivity
             drawer.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
+        }
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.navigation_top, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_save:
+                Intent intent_main = new Intent(LecteurActivity.this, MainActivity.class);
+                startActivity(intent_main);
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 
@@ -360,7 +423,37 @@ public class LecteurActivity extends AppCompatActivity
         }
 
         chapitreUrl = pageUrl;
-        new Lecteur().execute();
+
+        if (website_title.equals("JAPSCAN")) {
+
+            mProgressDialog = new ProgressDialog(this.mainContext);
+            mProgressDialog.setTitle(chapitreTitle);
+            mProgressDialog.setMessage("Loading...");
+            mProgressDialog.setIndeterminate(false);
+            mProgressDialog.show();
+
+            CloudFlareProxy cf = new CloudFlareProxy(JapScanProxy.urlRoot);
+
+            cf.setUser_agent(JapScanProxy.UA);
+            cf.getCookies(new CloudFlareProxy.cfCallback() {
+                @Override
+                public void onSuccess(List<HttpCookie> cookieList) {
+                    Log.i("CLOUDFLAREPROXY", "SUCCESS");
+                    cookies = CloudFlareProxy.List2Map(cookieList);
+
+                    mProgressDialog.dismiss();
+
+                    new Lecteur().execute();
+                }
+
+                @Override
+                public void onFail() {
+                    Log.i("CLOUDFLAREPROXY", "ECHEC");
+                }
+            });
+        } else {
+            new Lecteur().execute();
+        }
 
     }
 
@@ -392,9 +485,45 @@ public class LecteurActivity extends AppCompatActivity
 
                 chapitreUrl = nexPage.getUrl();
                 //new Lecteur().execute();
-                Lecteur lecteur = new Lecteur();
-                lecteur.gotToNextPage = true;
-                lecteur.execute();
+
+
+                if (website_title.equals("JAPSCAN")) {
+
+                    mProgressDialog = new ProgressDialog(this.mainContext);
+                    mProgressDialog.setTitle(chapitreTitle);
+                    mProgressDialog.setMessage("Loading...");
+                    mProgressDialog.setIndeterminate(false);
+                    mProgressDialog.show();
+
+                    CloudFlareProxy cf = new CloudFlareProxy(JapScanProxy.urlRoot);
+
+                    cf.setUser_agent(JapScanProxy.UA);
+                    cf.getCookies(new CloudFlareProxy.cfCallback() {
+                        @Override
+                        public void onSuccess(List<HttpCookie> cookieList) {
+                            Log.i("CLOUDFLAREPROXY", "SUCCESS");
+                            cookies = CloudFlareProxy.List2Map(cookieList);
+
+                            mProgressDialog.dismiss();
+
+                            Lecteur lecteur = new Lecteur();
+                            lecteur.gotToNextPage = true;
+                            lecteur.execute();
+                        }
+
+                        @Override
+                        public void onFail() {
+                            Log.i("CLOUDFLAREPROXY", "ECHEC");
+                        }
+                    });
+                } else {
+                    Lecteur lecteur = new Lecteur();
+                    lecteur.gotToNextPage = true;
+                    lecteur.execute();
+                }
+
+
+
             }
         }
     }
@@ -453,7 +582,36 @@ public class LecteurActivity extends AppCompatActivity
             onDoublesPageNb = 1;
         }
 
-        new Lecteur().execute();
+        if (website_title.equals("JAPSCAN")) {
+
+            mProgressDialog = new ProgressDialog(this.mainContext);
+            mProgressDialog.setTitle(this.titrePage.getText());
+            mProgressDialog.setMessage("Loading...");
+            mProgressDialog.setIndeterminate(false);
+            mProgressDialog.show();
+
+            CloudFlareProxy cf = new CloudFlareProxy(JapScanProxy.urlRoot);
+
+            cf.setUser_agent(JapScanProxy.UA);
+            cf.getCookies(new CloudFlareProxy.cfCallback() {
+                @Override
+                public void onSuccess(List<HttpCookie> cookieList) {
+                    Log.i("CLOUDFLAREPROXY", "SUCCESS");
+                    cookies = CloudFlareProxy.List2Map(cookieList);
+
+                    mProgressDialog.dismiss();
+
+                    new Lecteur().execute();
+                }
+
+                @Override
+                public void onFail() {
+                    Log.i("CLOUDFLAREPROXY", "ECHEC");
+                }
+            });
+        } else {
+            new Lecteur().execute();
+        }
     }
 
     public void goToPreviousChapter() {
@@ -485,7 +643,36 @@ public class LecteurActivity extends AppCompatActivity
             }
 
             chapitreUrl = precChapitre.getUrl();
-            new Lecteur().execute();
+            if (website_title.equals("JAPSCAN")) {
+
+                mProgressDialog = new ProgressDialog(this.mainContext);
+                mProgressDialog.setTitle(chapitreTitle);
+                mProgressDialog.setMessage("Loading...");
+                mProgressDialog.setIndeterminate(false);
+                mProgressDialog.show();
+
+                CloudFlareProxy cf = new CloudFlareProxy(JapScanProxy.urlRoot);
+
+                cf.setUser_agent(JapScanProxy.UA);
+                cf.getCookies(new CloudFlareProxy.cfCallback() {
+                    @Override
+                    public void onSuccess(List<HttpCookie> cookieList) {
+                        Log.i("CLOUDFLAREPROXY", "SUCCESS");
+                        cookies = CloudFlareProxy.List2Map(cookieList);
+
+                        mProgressDialog.dismiss();
+
+                        new Lecteur().execute();
+                    }
+
+                    @Override
+                    public void onFail() {
+                        Log.i("CLOUDFLAREPROXY", "ECHEC");
+                    }
+                });
+            } else {
+                new Lecteur().execute();
+            }
         }
     }
 
@@ -508,7 +695,7 @@ public class LecteurActivity extends AppCompatActivity
         @Override
         protected Void doInBackground(Void... params) {
             try {
-                MangaReaderProxy proxy = new MangaReaderProxy();
+
                 Log.e("getLecteurInfos", "Recuperation des donnes du chapitre " + chapitreTitle + " URL: " + chapitreUrl);
 
                 while (loadInBackground == true) {
@@ -519,7 +706,14 @@ public class LecteurActivity extends AppCompatActivity
                     serie = new Serie(background_serie);
                 }
                 else {
-                    serie = proxy.getLecteurInfos(chapitreTitle, chapitreUrl);
+                    if (website_title.equals("JAPSCAN")) {
+                        JapScanProxy proxy = new JapScanProxy(cookies);
+                        serie = proxy.getLecteurInfos(chapitreTitle, chapitreUrl);
+                    }
+                    else if (website_title.equals("MANGAREADER")) {
+                        MangaReaderProxy proxy = new MangaReaderProxy();
+                        serie = proxy.getLecteurInfos(chapitreTitle, chapitreUrl);
+                    }
                 }
 
             } catch (Exception e) {
@@ -601,7 +795,36 @@ public class LecteurActivity extends AppCompatActivity
             Chapitre nextChapitre = serie.getLstChapitres().get(2);
 
             if (!(currentImageindex + 1 == currentChapitre.getLstPage().size())) {
-                new LoadNewChapterInBackground().execute();
+                if (website_title.equals("JAPSCAN")) {
+                    mProgressDialog = new ProgressDialog(mainContext);
+                    mProgressDialog.setTitle("Dernières Sorties");
+                    mProgressDialog.setMessage("Loading...");
+                    mProgressDialog.setIndeterminate(false);
+                    mProgressDialog.show();
+
+                    CloudFlareProxy cf = new CloudFlareProxy(JapScanProxy.urlRoot);
+
+                    cf.setUser_agent(JapScanProxy.UA);
+                    cf.getCookies(new CloudFlareProxy.cfCallback() {
+                        @Override
+                        public void onSuccess(List<HttpCookie> cookieList) {
+                            Log.i("CLOUDFLAREPROXY", "SUCCESS");
+                            cookies = CloudFlareProxy.List2Map(cookieList);
+
+                            mProgressDialog.dismiss();
+
+                            new LoadNewChapterInBackground().execute();
+                        }
+
+                        @Override
+                        public void onFail() {
+                            Log.i("CLOUDFLAREPROXY", "ECHEC");
+                        }
+                    });
+                }
+                else if (website_title.equals("MANGAREADER")) {
+                    new LoadNewChapterInBackground().execute();
+                }
             }
 
             mProgressDialog.dismiss();
@@ -623,13 +846,19 @@ public class LecteurActivity extends AppCompatActivity
         @Override
         protected Void doInBackground(Void... params) {
             try {
-                MangaReaderProxy proxy = new MangaReaderProxy();
-
 
                 Page nexPage = currentChapitre.getLstPage().get(currentImageindex + 1);
 
-                Log.e("getLecteurInfos background", "Recuperation des donnes du chapitre " + nexPage.getTitle() + " URL: " + nexPage.getUrl());
-                background_serie = proxy.getLecteurInfos(nexPage.getTitle(), nexPage.getUrl());
+                Log.e("getLecteurInfos backgd", "Recuperation des donnes du chapitre " + nexPage.getTitle() + " URL: " + nexPage.getUrl());
+
+                if (website_title.equals("JAPSCAN")) {
+                    JapScanProxy proxy = new JapScanProxy(cookies);
+                    background_serie = proxy.getLecteurInfos(nexPage.getTitle(), nexPage.getUrl());
+                }
+                else if (website_title.equals("MANGAREADER")) {
+                    MangaReaderProxy proxy = new MangaReaderProxy();
+                    background_serie = proxy.getLecteurInfos(nexPage.getTitle(), nexPage.getUrl());
+                }
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -656,7 +885,7 @@ public class LecteurActivity extends AppCompatActivity
             }
 */
 
-            Log.e("getLecteurInfos background", "Fin");
+            Log.e("getLecteurInfos bacund", "Fin");
             loadInBackground = false;
         }
     }

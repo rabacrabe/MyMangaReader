@@ -4,14 +4,10 @@
 
     <item
         android:id="@+id/action_save"
-        android:icon="@drawable/ic_favorite_white_24dp"
-        android:title="Favoris"
+        android:icon="@android:drawable/ic_dialog_dialer"
+        android:title="Site Web"
         app:showAsAction="ifRoom" />
 
-    <item
-        android:id="@+id/action_delete"
-        android:icon="@drawable/ic_import_contacts_white_24dp"
-        android:title="Bookmark"
-        app:showAsAction="ifRoom" />
+
 
 </menu>

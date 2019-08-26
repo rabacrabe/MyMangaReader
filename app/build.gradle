@@ -16,8 +16,17 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/notice.txt'
+        exclude 'META-INF/ASL2.0'
+    }
 }
-
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.android.support:appcompat-v7:27.1.1'
@@ -28,4 +37,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation 'org.jsoup:jsoup:1.11.3'
     implementation 'com.squareup.picasso:picasso:2.5.2'
+    implementation 'com.github.Kelvao:CloudflareScrape:0.2.0'
+    implementation 'com.eclipsesource.j2v8:j2v8_android:3.0.5@aar'
+    implementation 'com.github.d-max:spots-dialog:1.1@aar'
 }

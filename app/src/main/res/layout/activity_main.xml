@@ -13,24 +13,29 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fontFamily="@font/bangers"
-        android:text="NOUVEAUTES"
+        android:text="SITES"
         android:textColor="#000000"
         android:textSize="24dp"
         tools:layout_editor_absoluteX="41dp"
         tools:layout_editor_absoluteY="0dp" />
 
-    <ExpandableListView
-        android:id="@+id/lst_dernieres_sorties"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:divider="@android:color/darker_gray"
-        android:dividerHeight="0.5dp"
-        android:indicatorLeft="?android:attr/expandableListPreferredItemIndicatorLeft" >
+        android:orientation="vertical">
 
+        <Button
+            android:id="@+id/button_japscan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="JapScan" />
 
-
-    </ExpandableListView>
-
+        <Button
+            android:id="@+id/button_mangareader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="MangaReader" />
+    </LinearLayout>
 
 
 </LinearLayout>

@@ -14,16 +14,18 @@ public class SerieDetailsTabAdapter extends FragmentStatePagerAdapter {
     String title;
     String url;
     Serie serie;
+    String website_title;
     private String tabTitles[] = new String[] { "Infos", "Chapitres"};
 
     //Constructor to the class
-    public SerieDetailsTabAdapter(FragmentManager fm, int tabCount, Serie serie) {
+    public SerieDetailsTabAdapter(FragmentManager fm, int tabCount, Serie serie, String website_title) {
         super(fm);
         //Initializing tab count
         this.serie = serie;
         this.tabCount= tabCount;
         this.title = serie.getTitle();
         this.url = serie.getUrl();
+        this.website_title = website_title;
     }
 
     //Overriding method getItem
@@ -35,7 +37,7 @@ public class SerieDetailsTabAdapter extends FragmentStatePagerAdapter {
                 return SerieDetailsTabInfos.newInstance(this.serie);
 
             case 1:
-                return SerieDetailsTabChapitres.newInstance(this.serie);
+                return SerieDetailsTabChapitres.newInstance(this.serie, website_title);
             default:
                 return null;
         }

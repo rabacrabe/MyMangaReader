@@ -25,6 +25,7 @@ public class SerieDetailsTabChapitres extends Fragment {
     //Overriden method onCreateView
     private String mTitre;
     private String mUrl;
+    private String mWebsite_title;
     private ArrayList<Chapitre> mLstChapitres;
     private ArrayList<Tome> mLstTomes;
     ExpandableListView expandableListView;
@@ -34,13 +35,16 @@ public class SerieDetailsTabChapitres extends Fragment {
 
 
 
-    public static SerieDetailsTabChapitres newInstance(Serie serie) {
+    public static SerieDetailsTabChapitres newInstance(Serie serie, String website_title) {
         Bundle args = new Bundle();
 
         args.putString("TITRE", serie.getTitle());
         args.putString("URL", serie.getUrl());
         args.putSerializable("LIST_CHAPITRES", serie.getLstChapitres());
         args.putSerializable("LIST_TOMES", serie.getLstTomes());
+        args.putSerializable("WEBSITE_TITLE", website_title);
+
+
 
         //args.putParcelableArrayList("LIST_CHAPITRES", serie.getLstChapitres());
         //args.putParcelableArrayList("LIST_TOMES", serie.getLstTomes());
@@ -56,6 +60,7 @@ public class SerieDetailsTabChapitres extends Fragment {
         mTitre = getArguments().getString("TITRE");
         mUrl = getArguments().getString("URL");
         mLstTomes = (ArrayList<Tome>)getArguments().getSerializable("LIST_TOMES");
+        mWebsite_title = getArguments().getString("WEBSITE_TITLE");
     }
 
     @Override
@@ -121,6 +126,8 @@ public class SerieDetailsTabChapitres extends Fragment {
                 intent_lecteur.putExtra("SERIE_URL", mUrl);
                 intent_lecteur.putExtra("CHAPITRE_TITLE", chapitre_title);
                 intent_lecteur.putExtra("CHAPITRE_URL", chapitre_url);
+                intent_lecteur.putExtra("WEBSITE_TITLE", mWebsite_title);
+
                 getActivity().startActivity(intent_lecteur);
 
                 return true;

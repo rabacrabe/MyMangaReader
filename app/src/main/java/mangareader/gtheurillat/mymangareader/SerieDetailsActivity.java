@@ -42,6 +42,7 @@ public class SerieDetailsActivity extends AppCompatActivity {
     private TabLayout tabLayout;
     private ViewPager viewPager;
     SerieDetailsTabAdapter adapter;
+    String website_title;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +53,8 @@ public class SerieDetailsActivity extends AppCompatActivity {
 
         mainContext = this;
 
-
+        website_title = getIntent().getStringExtra("WEBSITE_TITLE");
+        setTitle(website_title);
 
         title = getIntent().getStringExtra("SERIE_TITLE");
         url = getIntent().getStringExtra("SERIE_URL");
@@ -114,7 +116,7 @@ public class SerieDetailsActivity extends AppCompatActivity {
                 viewPager = (ViewPager) findViewById(R.id.pager);
 
                 //Creating our pager adapter
-                adapter = new SerieDetailsTabAdapter(getSupportFragmentManager(), tabLayout.getTabCount(), serie);
+                adapter = new SerieDetailsTabAdapter(getSupportFragmentManager(), tabLayout.getTabCount(), serie, website_title);
 
                 //Adding adapter to pager
                 viewPager.setAdapter(adapter);
